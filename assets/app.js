@@ -1,11 +1,10 @@
 (function () {
   const SW = 1200, SH = 750, GX = 140, GY = 300;
   const CHAPTER_NOTES = {
-    1: 'Who I am and how I got here',
-    2: 'Recurrence CFD of a buoyant jet',
-    3: 'Vision and RL, built from scratch',
-    4: 'SukaLoop, SantriLab, TEDI and more',
-    5: 'Experience, education, toolbox'
+    1: 'Where I come from, how I work',
+    2: 'One thesis, five models from scratch',
+    3: 'SukaLoop, SantriLab, TEDI and more',
+    4: 'Experience, education, toolbox'
   };
   const $ = s => document.querySelector(s);
   const viewport = $('#viewport'), world = $('#world');
@@ -21,19 +20,13 @@
     (rows[r] = rows[r] || []).push(el);
     el.dataset.i = i;
   });
-  // drawing-sheet frame and title block on every slide
-  slides.forEach((el, i) => {
-    const r = +el.dataset.row, ch = (rows[r] && rows[r][0].dataset.chapter) || '';
-    el.insertAdjacentHTML('afterbegin', '<div class="sheet-frame" aria-hidden="true"></div>');
-    el.insertAdjacentHTML('beforeend', `<div class="tblock" aria-hidden="true"><span>BZ-${String(i + 1).padStart(2, '0')}</span><span>${el.dataset.title}</span><span>Set ${String(r + 1).padStart(2, '0')} · ${ch}</span><span>Rev 2026.10</span><span class="cb"><i></i></span></div>`);
-  });
   const pos = new Map();
   const labels = [];
   rows.forEach((list, r) => {
     const chapter = list[0].dataset.chapter || '';
     const lab = document.createElement('div');
     lab.className = 'row-label';
-    lab.innerHTML = `<b>SET ${String(r + 1).padStart(2, '0')}</b>${chapter}<small>${list.length} sheets</small>`;
+    lab.innerHTML = `<b>${String(r + 1).padStart(2, '0')}</b>${chapter}`;
     world.insertBefore(lab, list[0]);
     labels.push(lab);
     list.forEach((el, c) => {
@@ -44,6 +37,10 @@
   });
   const bounds = { w: Math.max(...rows.map(l => l.length)) * (SW + GX) - GX, h: rows.length * (SH + GY) - GY };
 
+  document.querySelectorAll('.orbs i').forEach((o, k) => {
+    const f = [[-0.08, -0.15], [0.55, 0.05], [0.12, 0.45], [0.78, 0.55], [0.35, 0.85]][k] || [0.5, 0.5];
+    o.style.left = (f[0] * bounds.w - 950) + 'px'; o.style.top = (f[1] * bounds.h - 950) + 'px';
+  });
   function applyLayout() {
     slides.forEach(el => {
       const p = pos.get(el);
@@ -189,7 +186,7 @@
     slides.forEach((el, i) => {
       const p = pos.get(el), d = document.createElement('i');
       d.style.cssText = `left:${mmOX + p.x * mmK}px;top:${mmOY + p.y * mmK}px;width:${SW * mmK}px;height:${SH * mmK}px`;
-      if (el.classList.contains('dark')) d.classList.add('dark');
+      if (!el.classList.contains('pale')) d.classList.add('dark');
       if (i === current) d.classList.add('on');
       d.title = el.dataset.title;
       d.addEventListener('click', () => { stopTour(); focusSlide(i); });
@@ -232,7 +229,7 @@
     if (r === 0) return;
     eg.insertAdjacentHTML('beforeend', `<a href="#${list[0].id}" data-go="${list[0].id}"><span class="n">${String(r + 1).padStart(2, '0')} · ${list.length} slides</span><span class="t">${list[0].dataset.chapter}</span><span class="c">${CHAPTER_NOTES[r] || ''}</span></a>`);
   });
-  eg.insertAdjacentHTML('beforeend', `<a href="#contact" data-go="contact"><span class="n">→</span><span class="t">Reach out</span><span class="c">Email and GitHub</span></a>`);
+  eg.insertAdjacentHTML('beforeend', `<a href="#contact" data-go="contact"><span class="n">05 · contact</span><span class="t">Reach out</span><span class="c">Email and GitHub</span></a>`);
 
   // ---------- tools ----------
   let tool = 'select';
@@ -518,7 +515,7 @@
   function onResize() {
     vw = innerWidth; vh = innerHeight;
     const was = flow; flow = flowQuery.matches;
-    if (was !== flow) applyLayout();
+    if (was !== flow) { applyLayout(); window.ArtRepaint && window.ArtRepaint(); }
     if (!flow) {
       if (tgt.s >= focusScale() * 0.55 || was !== flow) focusSlide(current, true);
       buildMinimap();

@@ -2,7 +2,7 @@
    A warm jet enters from the left wall, buoyancy bends it upward, and
    (in "name" mode) the particles settle into the owner's name. */
 (function () {
-  const PALETTE = ['#2d3fa8', '#3f63ff', '#5b8cff', '#8a7cff', '#d9466f', '#ff5a36', '#ff7a2f', '#ff9d3f', '#ffc35a', '#ffe3a1'];
+  const PALETTE = ['#2a1b6e', '#3b22a0', '#5530c0', '#7a3bd0', '#a03fc0', '#c443a6', '#e0508e', '#f06a7a', '#fb8f7e', '#ffbf94'];
   const NB = PALETTE.length;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -24,7 +24,7 @@
       W = lastW = w; H = lastH = h; k = Math.min(W / 1200, H / 750) || 1;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = mode === 'name' ? '#07060c' : '#110f1a'; ctx.fillRect(0, 0, W, H);
     }
 
     function nozzleY() { return H * (W < H ? 0.8 : 0.7); }
@@ -47,20 +47,20 @@
       const o = off.getContext('2d');
       const portrait = W < H * 1.05;
       const fs = portrait ? Math.min(W * 0.27, H * 0.17) : Math.min(W * 0.15, H * 0.26);
-      const font = `condensed 800 ${fs}px Archivo, sans-serif`;
+      const font = `700 ${fs}px "Bricolage Grotesque", sans-serif`;
       try { await Promise.race([document.fonts.load(font), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
-      o.font = font; if ('fontStretch' in o) o.fontStretch = 'condensed';
-      const widest = Math.max(...(portrait ? ['BUKHORI', 'ZAINUN'] : ['BUKHORI ZAINUN']).map(t => o.measureText(t).width));
+      o.font = font;
+      const widest = Math.max(...(portrait ? ['Bukhori', 'Zainun'] : ['Bukhori Zainun']).map(t => o.measureText(t).width));
       if (widest > W * 0.84) {
         const f2 = fs * W * 0.84 / widest;
-        o.font = font.replace(`${fs}px`, `${f2}px`); if ('fontStretch' in o) o.fontStretch = 'condensed';
+        o.font = font.replace(`${fs}px`, `${f2}px`);
       }
       o.fillStyle = '#fff'; o.textAlign = 'center'; o.textBaseline = 'middle';
       if (portrait) {
-        o.fillText('BUKHORI', W / 2, H * 0.36);
-        o.fillText('ZAINUN', W / 2, H * 0.36 + fs * 0.92);
+        o.fillText('Bukhori', W / 2, H * 0.36);
+        o.fillText('Zainun', W / 2, H * 0.36 + fs * 0.92);
       } else {
-        o.fillText('BUKHORI ZAINUN', W / 2, H * 0.45);
+        o.fillText('Bukhori Zainun', W / 2, H * 0.45);
       }
       const img = o.getImageData(0, 0, off.width, off.height).data;
       const step = Math.max(2, Math.round(3 * k));
@@ -85,7 +85,7 @@
           if (p.hasT) {
             p.tx = targets[i][0]; p.ty = targets[i][1];
             const u = p.tx / W;
-            p.c = Math.min(NB - 1, Math.max(1, Math.round(1 + u * (NB - 2))));
+            p.c = Math.min(NB - 1, Math.max(3, Math.round(2 + u * (NB - 1))));
           }
           spawn(p, true);
           parts.push(p);
@@ -144,7 +144,7 @@
     const buckets = Array.from({ length: NB }, () => []);
     function draw() {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = mode === 'name' ? 'rgba(0,0,0,0.24)' : 'rgba(6,6,6,0.2)';
+      ctx.fillStyle = mode === 'name' ? 'rgba(7,6,12,0.24)' : 'rgba(17,15,26,0.2)';
       ctx.fillRect(0, 0, W, H);
       for (const b of buckets) b.length = 0;
       for (const p of parts) {
@@ -158,7 +158,7 @@
       const sz = Math.max(1.3, 1.7 * k);
       for (let i = 0; i < NB; i++) {
         const b = buckets[i]; if (!b.length) continue;
-        ctx.fillStyle = PALETTE[i]; ctx.globalAlpha = i < 3 ? 0.55 : 0.85;
+        ctx.fillStyle = PALETTE[i]; ctx.globalAlpha = i < 2 ? 0.6 : 0.9;
         ctx.beginPath();
         for (const p of b) ctx.rect(p.x, p.y, sz, sz);
         ctx.fill();
